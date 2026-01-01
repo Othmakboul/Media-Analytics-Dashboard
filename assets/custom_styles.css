@@ -1,0 +1,168 @@
+/* assets/custom_styles.css */
+
+body {
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  background-attachment: fixed; /* Ensures gradient covers full scroll */
+  color: #e0e0e0;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Glassmorphism Card Style */
+.glass-card {
+  background: rgba(20, 20, 20, 0.4); /* Darker, more transparent */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+}
+
+/* KPI Card specifics */
+.kpi-card {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease;
+  background: rgba(255, 255, 255, 0.03); /* Slightly lighter than base glass */
+}
+
+.kpi-card:hover {
+  transform: translateY(-5px);
+  border-color: #00bc8c; /* Cyan accent */
+  box-shadow: 0 10px 20px rgba(0, 188, 140, 0.15);
+}
+
+.kpi-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: -webkit-linear-gradient(45deg, #00bc8c, #007bff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.kpi-title {
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #adb5bd;
+  margin-bottom: 0.5rem;
+}
+
+/* Sidebar styling */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 25rem; 
+  padding: 2.5rem 1.5rem;
+  background: rgba(5, 5, 5, 0.85); /* Semi-transparent black */
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.content-area {
+  margin-left: 26rem;
+  padding: 2rem 3rem;
+  padding-bottom: 4rem;
+}
+
+/* --- Dark Mode Overrides for Dash Dropdowns (via React-Select) --- */
+
+/* The control itself */
+.Select-control {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 6px !important;
+    color: #fff !important;
+}
+
+/* Placeholder text */
+.Select-placeholder {
+    color: #888 !important;
+}
+
+/* The value text (selected item) */
+.Select-value-label {
+    color: #fff !important;
+}
+
+/* The menu container */
+.Select-menu-outer {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333 !important;
+    color: #fff !important;
+}
+
+/* Options in the menu */
+.VirtualzedSelectOption {
+    background-color: #1a1a1a !important;
+    color: #ddd !important;
+}
+
+.VirtualzedSelectFocusedOption {
+    background-color: #333 !important;
+    color: #fff !important;
+}
+
+/* Multi-value tags */
+.Select-value {
+    background-color: #00bc8c !important;
+    border-color: #00bc8c !important;
+    color: #fff !important;
+}
+.Select-value-icon {
+    border-right: 1px solid rgba(255,255,255,0.2) !important;
+}
+.Select-value-label {
+    color: #fff !important;
+}
+
+/* Input text */
+.Select-input > input {
+    color: #fff !important;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00bc8c;
+}
+
+/* --- Tabs --- */
+.nav-tabs {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-tabs .nav-link {
+  color: #888;
+  border: none;
+  background: transparent;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1rem 1.5rem;
+  transition: color 0.2s;
+}
+
+.nav-tabs .nav-link.active {
+  color: #fff;
+  background-color: transparent;
+  border-bottom: 3px solid #00bc8c;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #00bc8c;
+}

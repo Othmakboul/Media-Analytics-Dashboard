@@ -1,0 +1,43 @@
+# Fichiers à ignorer pour Git
+
+# Environnement virtuel Python
+venv/
+env/
+.venv/
+ENV/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.Python
+
+# Fichiers IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs et fichiers temporaires
+*.log
+*.tmp
+*.temp
+
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Données sensibles (décommenter si nécessaire)
+data/raw/
+# .env
+# secrets.py
