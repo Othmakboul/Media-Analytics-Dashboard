@@ -1,0 +1,16 @@
+[project]
+name = "media-analytics-dashboard"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dash>=3.3.0",
+    "dash-bootstrap-components>=2.0.4",
+    "groq>=0.11.0",
+    "ipykernel>=7.1.0",
+    "pandas>=2.3.3",
+    "plotly>=6.5.0",
+    "python-dotenv>=1.0.0",
+    "tiktoken>=0.8.0",
+]

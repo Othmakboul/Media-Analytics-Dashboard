@@ -139,16 +139,55 @@ def create_tabs_content():
             
             dbc.Tab(label="AI Analyst", tab_id="tab-ai", children=[
                 html.Div([
-                    html.H4("Assistant IA", className="mb-3"),
-                    html.P("Posez une question sur le corpus...", className="text-muted"),
+                    html.Div([
+                        html.H4("Assistant IA Groq", className="mb-2", style={'display': 'inline-block'}),
+                        dbc.Button(
+                            "Effacer l'historique",
+                            id="ai-clear-history-btn",
+                            color="secondary",
+                            size="sm",
+                            className="float-end",
+                            outline=True
+                        ),
+                    ], className="mb-3"),
+                    html.P("Posez des questions sur le corpus filtré...", className="text-muted small"),
+
+                    # Chat history display (scrollable)
+                    html.Div(
+                        id="ai-chat-history-display",
+                        className="mb-3 p-3 border rounded",
+                        style={
+                            'minHeight': '300px',
+                            'maxHeight': '400px',
+                            'overflowY': 'auto',
+                            'backgroundColor': '#1a1a1a',
+                            'border': '1px solid #333'
+                        }
+                    ),
+
+                    # Input area
                     dbc.Textarea(
                         id="ai-input",
-                        placeholder="Ex: Quelle est la tendance du sentiment sur la France en 2023 ?",
+                        placeholder="Ex: Quelle est la tendance du sentiment ? Résume les articles principaux.",
                         className="mb-3",
+                        rows=3,
                         style={'backgroundColor': '#222', 'color': '#fff', 'border': '1px solid #444'}
                     ),
-                    dbc.Button("Analyser", id="ai-submit-btn", color="success", className="mb-4"),
-                    html.Div(id="ai-response-area", className="p-3 border rounded", style={'minHeight': '200px', 'backgroundColor': '#1a1a1a'})
+                    dbc.Button(
+                        "Analyser",
+                        id="ai-submit-btn",
+                        color="success",
+                        className="mb-3",
+                        style={'width': '100%'}
+                    ),
+
+                    # Response area with loading indicator
+                    dcc.Loading(
+                        id="ai-loading",
+                        type="default",
+                        color="#00bc8c",
+                        children=html.Div(id="ai-response-area")
+                    )
                 ], className="pt-3 glass-card p-4")
             ]),
         ],
@@ -165,7 +204,9 @@ def create_layout():
                     create_kpi_cards(),
                     create_tabs_content(),
                     # Store for shared data signal (optional, but good practice for updates)
-                    dcc.Store(id='store-data-trigger')
+                    dcc.Store(id='store-data-trigger'),
+                    # Store for AI chat history
+                    dcc.Store(id='ai-chat-history', data=[])
                 ],
                 className="content-area"
             )

@@ -2,13 +2,16 @@ from dash import Input, Output, State, callback, no_update, ctx, html
 import pandas as pd
 from src.data_processing import load_data, filter_data, explode_entities
 from src.visualizations import (
-    create_timeline, 
-    create_sunburst, 
-    create_cooccurrence_heatmap, 
+    create_timeline,
+    create_sunburst,
+    create_cooccurrence_heatmap,
     create_top_persons_bar,
     create_top_locations_bar,
     create_wordcloud_scatter
 )
+from src.ai_service import get_ai_service
+import dash_bootstrap_components as dbc
+from datetime import datetime
 
 # Load data once at module level (cached)
 df = load_data()
@@ -130,25 +133,168 @@ def reset_filters(n_clicks):
 
 # --- AI Analyst ---
 @callback(
-    Output('ai-response-area', 'children'),
+    Output('ai-chat-history', 'data'),
+    Output('ai-input', 'value'),
     Input('ai-submit-btn', 'n_clicks'),
-    State('ai-input', 'value')
+    State('ai-input', 'value'),
+    State('ai-chat-history', 'data'),
+    State('date-picker-range', 'start_date'),
+    State('date-picker-range', 'end_date'),
+    State('dropdown-kws', 'value'),
+    State('dropdown-loc', 'value'),
+    prevent_initial_call=True
 )
-def ai_analyst_response(n_clicks, query):
-    if not n_clicks or not query:
-        return "En attente de votre question..."
-    
-    import time
-    time.sleep(1) # Simulate processing
-    return html.Div([
-        html.P(f"Analyse pour : '{query}'", className="mb-2 text-info"),
-        html.Div([
-            html.P("D'après l'analyse du corpus, voici les tendances identifiées :"),
-            html.Ul([
-                html.Li("Le sujet est en forte croissance ce dernier trimestre."),
-                html.Li("Sentiment global mitigé avec des pics de négativité en Février."),
-                html.Li("Les entités associées suggèrent un contexte géopolitique complexe.")
-            ]),
-            html.Small("(Réponse générée par le module de simulation IA)", className="text-muted")
-        ], className="p-3 border rounded", style={'backgroundColor': 'rgba(255,255,255,0.05)', 'border': '1px solid #333'})
-    ])
+def ai_analyst_query(n_clicks, query, chat_history, start_date, end_date, selected_kws, selected_locs):
+    """
+    Context-aware AI callback that uses Groq API.
+    Filters data based on current dashboard state and sends to AI.
+    """
+    if not query or not query.strip():
+        return no_update, no_update
+
+    # Initialize chat history if None
+    if chat_history is None:
+        chat_history = []
+
+    try:
+        # Filter data based on current dashboard state
+        filtered_df = filter_data(df, start_date, end_date, selected_kws, selected_locs)
+
+        # Prepare filter info for context
+        filters = {
+            'start_date': start_date,
+            'end_date': end_date,
+            'keywords': selected_kws or [],
+            'locations': selected_locs or []
+        }
+
+        # Get AI service instance
+        ai_service = get_ai_service()
+
+        # Prepare data context
+        context = ai_service.prepare_data_context(filtered_df, filters)
+
+        # Generate AI response
+        result = ai_service.generate_response(query, context)
+
+        # Add user message to history
+        chat_history.append({
+            'role': 'user',
+            'content': query,
+            'timestamp': datetime.now().isoformat()
+        })
+
+        # Add AI response to history
+        if result['success']:
+            chat_history.append({
+                'role': 'assistant',
+                'content': result['message'],
+                'timestamp': datetime.now().isoformat()
+            })
+        else:
+            # Add error message
+            chat_history.append({
+                'role': 'error',
+                'content': result['message'],
+                'timestamp': datetime.now().isoformat()
+            })
+
+        # Clear input and return updated history
+        return chat_history, ""
+
+    except Exception as e:
+        # Handle unexpected errors
+        error_msg = f"Erreur lors de la génération de la réponse : {str(e)}"
+        chat_history.append({
+            'role': 'user',
+            'content': query,
+            'timestamp': datetime.now().isoformat()
+        })
+        chat_history.append({
+            'role': 'error',
+            'content': error_msg,
+            'timestamp': datetime.now().isoformat()
+        })
+        return chat_history, ""
+
+
+@callback(
+    Output('ai-chat-history-display', 'children'),
+    Input('ai-chat-history', 'data')
+)
+def display_chat_history(chat_history):
+    """
+    Displays the chat history in a formatted way.
+    """
+    if not chat_history:
+        return html.P(
+            "Aucun message. Posez une question pour commencer !",
+            className="text-muted text-center",
+            style={'marginTop': '100px'}
+        )
+
+    messages = []
+    for msg in chat_history:
+        role = msg.get('role', 'user')
+        content = msg.get('content', '')
+        timestamp = msg.get('timestamp', '')
+
+        # Format timestamp
+        try:
+            dt = datetime.fromisoformat(timestamp)
+            time_str = dt.strftime('%H:%M:%S')
+        except:
+            time_str = ''
+
+        if role == 'user':
+            # User message (right-aligned, blue)
+            message_div = html.Div([
+                html.Div([
+                    html.Small(time_str, className="text-muted d-block mb-1"),
+                    html.Div(content, className="p-2 rounded", style={
+                        'backgroundColor': '#0d6efd',
+                        'color': '#fff',
+                        'display': 'inline-block',
+                        'maxWidth': '80%'
+                    })
+                ], style={'textAlign': 'right'})
+            ], className="mb-3")
+        elif role == 'assistant':
+            # AI message (left-aligned, green)
+            message_div = html.Div([
+                html.Div([
+                    html.Small(time_str, className="text-muted d-block mb-1"),
+                    dbc.Alert(content, color="success", className="mb-0", style={
+                        'whiteSpace': 'pre-wrap',
+                        'maxWidth': '90%',
+                        'display': 'inline-block'
+                    })
+                ], style={'textAlign': 'left'})
+            ], className="mb-3")
+        else:  # error
+            # Error message (left-aligned, red)
+            message_div = html.Div([
+                html.Div([
+                    html.Small(time_str, className="text-muted d-block mb-1"),
+                    dbc.Alert(content, color="danger", className="mb-0", style={
+                        'maxWidth': '90%',
+                        'display': 'inline-block'
+                    })
+                ], style={'textAlign': 'left'})
+            ], className="mb-3")
+
+        messages.append(message_div)
+
+    return messages
+
+
+@callback(
+    Output('ai-chat-history', 'data', allow_duplicate=True),
+    Input('ai-clear-history-btn', 'n_clicks'),
+    prevent_initial_call=True
+)
+def clear_chat_history(n_clicks):
+    """
+    Clears the chat history when the clear button is clicked.
+    """
+    return []
